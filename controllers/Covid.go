@@ -15,6 +15,8 @@ const baseHistorucURLv3 string = "https://disease.sh/v3/covid-19/historical/"
 const vacineUrl string = "https://disease.sh/v3/covid-19/vaccine/coverage/countries/" //Portugal?lastdays=3&fullData=true"
 const vacineUrlParams string = "?lastdays=2&fullData=true"
 
+// GetHistoricalCountryData gets country covid history for the past x days from API.
+// Returns a CountryHistory Struct
 func GetHistoricalCountryData(country string) models.CountryHistory {
 	// Get country data
 	url := baseHistorucURLv3 + country + "?lastdays=3"
@@ -45,11 +47,11 @@ func GetHistoricalCountryData(country string) models.CountryHistory {
 		log.Fatal(jsonErr)
 	}
 
-	fmt.Println(usedCountry)
-
 	return usedCountry
 }
 
+// GetVacineData gets country covid vacine data from API.
+// Returns a VaccineCountryData Struct
 func GetVacineData(country string) {
 	resp, _ := http.Get(vacineUrl + country + vacineUrlParams)
 
@@ -65,6 +67,8 @@ func GetVacineData(country string) {
 	}
 }
 
+// GetCountryData gets generic country covid data from API.
+// Returns a Country Struct
 func GetCountryData(country string) models.Country {
 	// Get country data
 	resp, err := http.Get(baseURLv3 + country)
@@ -96,6 +100,8 @@ func GetCountryData(country string) models.Country {
 	return usedCountry
 }
 
+// validateCountry validates covid data from API.
+// Returns a String and error
 func validateCountry(country string) (string, error) {
 	return country, nil
 }

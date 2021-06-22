@@ -10,11 +10,8 @@ import (
 
 func TeleCovidBot() (*tb.Bot, error) {
 
+	// Create new bot
 	b, err := tb.NewBot(tb.Settings{
-		// You can also set custom API URL.
-		// If field is empty it equals to "https://api.telegram.org".
-		//URL: ,
-
 		Token:  "1284369386:AAFL4px7I-31qqs5GnZaV-7TFiVt98bMAXA",
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
@@ -23,11 +20,12 @@ func TeleCovidBot() (*tb.Bot, error) {
 		return nil, err
 	}
 
+	// /covid handler. Accepts /covid <country>. Default country is Portugal
 	b.Handle("/covid", func(m *tb.Message) {
 
 		// String split
 		var input []string = s.Split(m.Text, " ")
-		var country string = s.Join(input[1:len(input)], " ")
+		var country string = s.Join(input[1:], " ")
 
 		if country == "" {
 			country = "portugal"
@@ -40,11 +38,12 @@ func TeleCovidBot() (*tb.Bot, error) {
 		b.Send(m.Sender, countryData.GetReport())
 	})
 
+	// /history handler. Accepts /history <country>. Default country is Portugal
 	b.Handle("/history", func(m *tb.Message) {
 
 		// String split
 		var input []string = s.Split(m.Text, " ")
-		var country string = s.Join(input[1:len(input)], " ")
+		var country string = s.Join(input[1:], " ")
 
 		if country == "" {
 			country = "portugal"
@@ -57,8 +56,9 @@ func TeleCovidBot() (*tb.Bot, error) {
 		b.Send(m.Sender, countryHistoryData.GetReport())
 	})
 
+	// /subscribe handler.
 	b.Handle("/subscribe", func(m *tb.Message) {
-		//RSTARSTARSTARST
+
 		b.Send(m.Sender, "Subscription Compleeede")
 	})
 
