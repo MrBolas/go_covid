@@ -17,13 +17,13 @@ const vacineUrlParams string = "?lastdays=2&fullData=true"
 
 // GetHistoricalCountryData gets country covid history for the past x days from API.
 // Returns a CountryHistory Struct
-func GetHistoricalCountryData(country string) models.CountryHistory {
+func GetHistoricalCountryData(country string, days int) models.CountryHistory {
 	// Get country data
-	url := baseHistorucURLv3 + country + "?lastdays=3"
-	fmt.Println(url)
+	url := fmt.Sprintf("%s%s?lastdays=%d", baseHistorucURLv3, country, days)
 	resp, err := http.Get(url)
+
+	// handle error
 	if err != nil {
-		// handle error
 		log.Fatal(err)
 	}
 

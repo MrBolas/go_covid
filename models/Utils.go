@@ -2,7 +2,7 @@ package models
 
 import "sort"
 
-func getSortedKeys(m map[string]int) []string {
+func GetSortedKeys(m map[string]int) []string {
 	keys := make([]string, 0, len(m))
 	// values := make([]int, 0, len(m))
 

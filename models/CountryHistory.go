@@ -1,6 +1,10 @@
 package models
 
-import "github.com/kyokomi/emoji/v2"
+import (
+	"time"
+
+	"github.com/kyokomi/emoji/v2"
+)
 
 type CountryTimeline struct {
 	Cases     map[string]int `json:"cases"`
@@ -14,10 +18,13 @@ type CountryHistory struct {
 	Timeline CountryTimeline
 }
 
+const layoutUS = "1/2/06"
+
+// GetReport returns a report in string format
 func (c *CountryHistory) GetReport() string {
 
-	sortedCasesKeys := getSortedKeys(c.Timeline.Cases)
-	sortedDeathsKeys := getSortedKeys(c.Timeline.Deaths)
+	sortedCasesKeys := GetSortedKeys(c.Timeline.Cases)
+	sortedDeathsKeys := GetSortedKeys(c.Timeline.Deaths)
 	//sortedRecoveredKeys := getSortedKeys(c.Timeline.Recovered)
 
 	todayCases := c.Timeline.Cases[sortedCasesKeys[2]] - c.Timeline.Cases[sortedCasesKeys[1]]
@@ -31,4 +38,64 @@ func (c *CountryHistory) GetReport() string {
 		c.Country, todayCases, yesterdayCases, todayDeaths, yesterdayDeaths)
 
 	return report
+}
+
+// GetCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
+func (c CountryTimeline) GetCasesTimeSeries() ([]time.Time, []float64, error) {
+
+	// Order cases by date
+	var orderedHistoryData []string = GetSortedKeys(c.Cases)
+
+	// Define return slices
+	var TimeSeries []time.Time
+	var ValueSeries []float64
+
+	// Goes for Dates and separates two sets of data.
+	// TimeSeries are the dates.
+	// ValueSeries are the corresponding values.
+	for _, date := range orderedHistoryData {
+		timeEvent, err := time.Parse(layoutUS, date)
+
+		// Appends Dates
+		TimeSeries = append(TimeSeries, timeEvent)
+
+		// Appends Date Values
+		ValueSeries = append(ValueSeries, float64(c.Cases[date]))
+
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return TimeSeries, ValueSeries, nil
+}
+
+// GetCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
+func (c CountryTimeline) GetDeathsTimeSeries() ([]time.Time, []float64, error) {
+
+	// Order cases by date
+	var orderedHistoryData []string = GetSortedKeys(c.Deaths)
+
+	// Define return slices
+	var TimeSeries []time.Time
+	var ValueSeries []float64
+
+	// Goes for Dates and separates two sets of data.
+	// TimeSeries are the dates.
+	// ValueSeries are the corresponding values.
+	for _, date := range orderedHistoryData {
+		timeEvent, err := time.Parse(layoutUS, date)
+
+		// Appends Dates
+		TimeSeries = append(TimeSeries, timeEvent)
+
+		// Appends Date Values
+		ValueSeries = append(ValueSeries, float64(c.Deaths[date]))
+
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return TimeSeries, ValueSeries, nil
 }
