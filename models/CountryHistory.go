@@ -70,6 +70,42 @@ func (c CountryTimeline) GetCasesTimeSeries() ([]time.Time, []float64, error) {
 	return TimeSeries, ValueSeries, nil
 }
 
+// GetRelativeCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
+func (c CountryTimeline) GetRelativeCasesTimeSeries() ([]time.Time, []float64, error) {
+
+	// Order cases by date
+	var orderedHistoryData []string = GetSortedKeys(c.Cases)
+
+	// Define return slices
+	var TimeSeries []time.Time
+	var ValueSeries []float64
+
+	// Goes for Dates and separates two sets of data.
+	// TimeSeries are the dates.
+	// ValueSeries are the corresponding values.
+	for dateIndex, date := range orderedHistoryData {
+		timeEvent, err := time.Parse(layoutUS, date)
+
+		// Defines a relative value to the previous
+		newValue := float64(c.Cases[date])
+		if dateIndex > 1 {
+			newValue -= float64(c.Cases[orderedHistoryData[dateIndex-1]])
+
+			// Appends Dates
+			TimeSeries = append(TimeSeries, timeEvent)
+
+			// Appends Date Values
+			ValueSeries = append(ValueSeries, newValue)
+		}
+
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return TimeSeries, ValueSeries, nil
+}
+
 // GetCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
 func (c CountryTimeline) GetDeathsTimeSeries() ([]time.Time, []float64, error) {
 
@@ -91,6 +127,42 @@ func (c CountryTimeline) GetDeathsTimeSeries() ([]time.Time, []float64, error) {
 
 		// Appends Date Values
 		ValueSeries = append(ValueSeries, float64(c.Deaths[date]))
+
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return TimeSeries, ValueSeries, nil
+}
+
+// GetCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
+func (c CountryTimeline) GetRelativeDeathsTimeSeries() ([]time.Time, []float64, error) {
+
+	// Order cases by date
+	var orderedHistoryData []string = GetSortedKeys(c.Deaths)
+
+	// Define return slices
+	var TimeSeries []time.Time
+	var ValueSeries []float64
+
+	// Goes for Dates and separates two sets of data.
+	// TimeSeries are the dates.
+	// ValueSeries are the corresponding values.
+	for dateIndex, date := range orderedHistoryData {
+		timeEvent, err := time.Parse(layoutUS, date)
+
+		// Defines a relative value to the previous
+		newValue := float64(c.Deaths[date])
+		if dateIndex > 1 {
+			newValue -= float64(c.Deaths[orderedHistoryData[dateIndex-1]])
+
+			// Appends Dates
+			TimeSeries = append(TimeSeries, timeEvent)
+
+			// Appends Date Values
+			ValueSeries = append(ValueSeries, newValue)
+		}
 
 		if err != nil {
 			return nil, nil, err
