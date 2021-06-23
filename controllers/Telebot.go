@@ -32,7 +32,7 @@ func TeleCovidBot() (*tb.Bot, error) {
 		var country string = "Portugal"
 
 		if len(input) > 1 {
-			country = s.Join(input[1:len(input)-1], " ")
+			country = s.Join(input[1:], " ")
 		}
 
 		// Get Country Data
@@ -50,7 +50,7 @@ func TeleCovidBot() (*tb.Bot, error) {
 		var country string = "Portugal"
 
 		if len(input) > 1 {
-			country = s.Join(input[1:len(input)-1], " ")
+			country = s.Join(input[1:], " ")
 		}
 
 		// Get Country Data
