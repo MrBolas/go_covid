@@ -28,11 +28,11 @@ func TeleCovidBot() (*tb.Bot, error) {
 	b.Handle("/covid", func(m *tb.Message) {
 
 		// String split
-		var input []string = s.Split(m.Text, " ")
-		var country string = s.Join(input[1:], " ")
+		var input []string = s.Fields(m.Text)
+		var country string = "Portugal"
 
-		if country == "" {
-			country = "portugal"
+		if len(input) > 1 {
+			country = s.Join(input[1:len(input)-1], " ")
 		}
 
 		// Get Country Data
@@ -46,11 +46,11 @@ func TeleCovidBot() (*tb.Bot, error) {
 	b.Handle("/history", func(m *tb.Message) {
 
 		// String split
-		var input []string = s.Split(m.Text, " ")
-		var country string = s.Join(input[1:], " ")
+		var input []string = s.Fields(m.Text)
+		var country string = "Portugal"
 
-		if country == "" {
-			country = "portugal"
+		if len(input) > 1 {
+			country = s.Join(input[1:len(input)-1], " ")
 		}
 
 		// Get Country Data
@@ -64,8 +64,8 @@ func TeleCovidBot() (*tb.Bot, error) {
 	b.Handle("/casesChart", func(m *tb.Message) {
 
 		// String split
-		var input []string = s.Split(m.Text, " ")
-		var country string = "portugal"
+		var input []string = s.Fields(m.Text)
+		var country string = "Portugal"
 		var days int = 7
 
 		if len(input) > 1 {
@@ -114,8 +114,8 @@ func TeleCovidBot() (*tb.Bot, error) {
 	b.Handle("/deathsChart", func(m *tb.Message) {
 
 		// String split
-		var input []string = s.Split(m.Text, " ")
-		var country string = "portugal"
+		var input []string = s.Fields(m.Text)
+		var country string = "Portugal"
 		var days int = 7
 
 		if len(input) > 1 {
