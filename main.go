@@ -12,14 +12,18 @@ import (
 // return the value of the key
 func goDotEnvVariable(key string) string {
 
-  // load .env file
-  err := godotenv.Load(".env")
+	// load .env file
+	err := godotenv.Load()
 
-  if err != nil {
-    log.Fatalf("Error loading .env file")
-  }
+	if err != nil {
+		log.Println("Error loading .env file, will continue")
+	}
 
-  return os.Getenv(key)
+	result := os.Getenv(key)
+	if len(result) < 1 {
+		log.Printf("key %s not found in env\n", key)
+	}
+	return result
 }
 
 func main() {
