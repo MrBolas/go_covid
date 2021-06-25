@@ -12,11 +12,11 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-func TeleCovidBot() (*tb.Bot, error) {
+func TeleCovidBot(token string) (*tb.Bot, error) {
 
 	// Create new bot
 	b, err := tb.NewBot(tb.Settings{
-		Token:  "1284369386:AAFL4px7I-31qqs5GnZaV-7TFiVt98bMAXA",
+		Token: token,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
