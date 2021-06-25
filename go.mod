@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/joho/godotenv v1.3.0
 	github.com/kyokomi/emoji/v2 v2.2.8
+	github.com/pariz/gountries v0.0.0-20200430155801-1c6a393df9c7
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/wcharczuk/go-chart v2.0.1+incompatible // indirect
 	github.com/wcharczuk/go-chart/v2 v2.1.0
