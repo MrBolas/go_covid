@@ -2,21 +2,24 @@ package controllers
 
 import (
 	"fmt"
+	"go_covid/models"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	s "strings"
 	"time"
 
 	chart "github.com/wcharczuk/go-chart/v2"
 	tb "gopkg.in/tucnak/telebot.v2"
+	"gorm.io/gorm"
 )
 
-func TeleCovidBot() (*tb.Bot, error) {
+func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 
 	// Create new bot
 	b, err := tb.NewBot(tb.Settings{
-		Token:  "1284369386:AAFL4px7I-31qqs5GnZaV-7TFiVt98bMAXA",
+		Token:  token,
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
 
@@ -239,10 +242,73 @@ func TeleCovidBot() (*tb.Bot, error) {
 
 	// /subscribe handler.
 	b.Handle("/subscribe", func(m *tb.Message) {
+		// String split
+		var input []string = s.Fields(m.Text)
+		var country string = "Portugal"
 
-		b.Send(m.Sender, "Subscription Compleeede")
+		if len(input) > 1 {
+			country = s.Join(input[1:], " ")
+		}
+		telegramId := m.Sender.ID
+		var subscription models.Subscription
+		// Check if subscription exists
+		result := db.Where("telegram_id = ? AND country = ?", telegramId, country).First(&subscription)
+		resultString := ""
+		if result.RowsAffected == 0 {
+			// Will create
+			db.Create(&models.Subscription{Username: m.Sender.Username, TelegramId: m.Sender.ID, Country: country})
+			resultString = fmt.Sprintln("Subscription added for", country)
+		} else {
+			resultString = fmt.Sprintln("You already have a subscription for", country, "to unsubscribe use /unsubscribe", country)
+		}
+		b.Send(m.Sender, resultString)
 	})
 
+	// /unsubscribe handler.
+	b.Handle("/unsubscribe", func(m *tb.Message) {
+		// String split
+		var input []string = s.Fields(m.Text)
+		var country string = "Portugal"
+
+		if len(input) > 1 {
+			country = s.Join(input[1:], " ")
+		}
+		telegramId := m.Sender.ID
+		var subscription models.Subscription
+		// Check if subscription exists
+		result := db.Where("telegram_id = ? AND country = ?", telegramId, country).First(&subscription)
+		resultString := ""
+		if result.RowsAffected == 0 {
+			resultString = fmt.Sprintln("Subscription not found for", country)
+		} else {
+			// Will delete
+			db.Delete(&subscription)
+			resultString = fmt.Sprintln("You subscription for", country, "deleted")
+		}
+		b.Send(m.Sender, resultString)
+	})
+
+	// /unsubscribe handler.
+	b.Handle("/subscriptions", func(m *tb.Message) {
+		// String split
+		telegramId := m.Sender.ID
+		var subscriptions []models.Subscription
+		// Check existing subscriptions
+		result := db.Where("telegram_id = ?", telegramId).Find(&subscriptions)
+		resultString := ""
+		if result.RowsAffected == 0 {
+			resultString = fmt.Sprintln("Subscriptions not found")
+		} else {
+			log.Println(subscriptions)
+			var theArray []string
+			for i := 0; i < len(subscriptions); i++ {
+				log.Println(subscriptions[i])
+				theArray = append(theArray, subscriptions[i].Country)
+			}
+			resultString = fmt.Sprintln("You have subscriptions for", strings.Join(theArray, ", "))
+		}
+		b.Send(m.Sender, resultString)
+	})
 	return b, nil
 }
 
