@@ -180,7 +180,10 @@ func TeleCovidBot() (*tb.Bot, error) {
 		}
 
 		// Create image file and render image
-		f, _ := os.Create("assets/covid-death-graph.png")
+		f, err := os.Create("assets/covid-death-graph.png")
+		if err != nil {
+			log.Fatal(err)
+		}
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
 
