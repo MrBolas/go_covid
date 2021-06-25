@@ -32,10 +32,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 
 		// String split
 		var input []string = s.Fields(m.Text)
-		var country string = "Portugal"
-
-		if len(input) > 1 {
-			country = s.Join(input[1:], " ")
+		// Parse Input string
+		country, _, err := parseInputs(input)
+		if err != nil {
+			b.Send(m.Chat, "Could not find country")
+			return
 		}
 
 		// Get Country Data
@@ -50,14 +51,15 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 
 		// String split
 		var input []string = s.Fields(m.Text)
-		var country string = "Portugal"
-
-		if len(input) > 1 {
-			country = s.Join(input[1:], " ")
+		// Parse Input string
+		country, days, err := parseInputs(input)
+		if err != nil {
+			b.Send(m.Chat, "Could not find country")
+			return
 		}
 
 		// Get Country Data
-		var countryHistoryData = GetHistoricalCountryData(country, 3)
+		var countryHistoryData = GetHistoricalCountryData(country, days)
 
 		// b.Send(m.Sender, "Hello World!")
 		b.Send(m.Chat, countryHistoryData.GetReport())
@@ -70,7 +72,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		var input []string = s.Fields(m.Text)
 
 		// Parse Input string
-		country, days := parseInputs(input)
+		country, days, err := parseInputs(input)
+		if err != nil {
+			b.Send(m.Chat, "Could not find country")
+			return
+		}
 
 		fmt.Printf("Cases Chart -> country: %s days: %d\n", country, days)
 
@@ -114,7 +120,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		var input []string = s.Fields(m.Text)
 
 		// Parse Input string
-		country, days := parseInputs(input)
+		country, days, err := parseInputs(input)
+		if err != nil {
+			b.Send(m.Chat, "Could not find country")
+			return
+		}
 
 		fmt.Printf("Cases Chart -> country: %s days: %d\n", country, days)
 
@@ -158,7 +168,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		var input []string = s.Fields(m.Text)
 
 		// Parse Input string
-		country, days := parseInputs(input)
+		country, days, err := parseInputs(input)
+		if err != nil {
+			b.Send(m.Chat, "Could not find country")
+			return
+		}
 
 		fmt.Printf("Deaths Chart -> country: %s days: %d\n", country, days)
 
@@ -204,7 +218,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		var input []string = s.Fields(m.Text)
 
 		// Parse Input string
-		country, days := parseInputs(input)
+		country, days, err := parseInputs(input)
+		if err != nil {
+			b.Send(m.Chat, "Could not find country")
+			return
+		}
 
 		fmt.Printf("Deaths Chart -> country: %s days: %d\n", country, days)
 
@@ -244,11 +262,13 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 	b.Handle("/subscribe", func(m *tb.Message) {
 		// String split
 		var input []string = s.Fields(m.Text)
-		var country string = "Portugal"
-
-		if len(input) > 1 {
-			country = s.Join(input[1:], " ")
+		// Parse Input string
+		country, _, err := parseInputs(input)
+		if err != nil {
+			b.Send(m.Chat, "Could not find country")
+			return
 		}
+
 		telegramId := m.Sender.ID
 		var subscription models.Subscription
 		// Check if subscription exists
@@ -268,10 +288,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 	b.Handle("/unsubscribe", func(m *tb.Message) {
 		// String split
 		var input []string = s.Fields(m.Text)
-		var country string = "Portugal"
-
-		if len(input) > 1 {
-			country = s.Join(input[1:], " ")
+		// Parse Input string
+		country, _, err := parseInputs(input)
+		if err != nil {
+			b.Send(m.Chat, "Could not find country")
+			return
 		}
 		telegramId := m.Sender.ID
 		var subscription models.Subscription
@@ -312,7 +333,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 	return b, nil
 }
 
-func parseInputs(input []string) (string, int) {
+func parseInputs(input []string) (string, int, error) {
 
 	// Default Values
 	var country string = "Portugal"
@@ -335,6 +356,8 @@ func parseInputs(input []string) (string, int) {
 	if len(input) > 1 {
 		country = s.Join(input[1:], " ")
 	}
+	result, err := SearchCountry(country)
 
-	return country, days
+	country = result.Name.Common
+	return country, days, err
 }
