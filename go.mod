@@ -10,4 +10,6 @@ require (
 	github.com/wcharczuk/go-chart/v2 v2.1.0
 	golang.org/x/image v0.0.0-20210607152325-775e3b0c77b9 // indirect
 	gopkg.in/tucnak/telebot.v2 v2.3.5
+	gorm.io/driver/sqlite v1.1.4
+	gorm.io/gorm v1.21.11
 )

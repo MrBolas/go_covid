@@ -28,8 +28,9 @@ func goDotEnvVariable(key string) string {
 
 func main() {
 	token := goDotEnvVariable("TELEGRAM_TOKEN")
+	db := bot.InitDB()
 
-	b, err := bot.TeleCovidBot(token)
+	b, err := bot.TeleCovidBot(token, db)
 
 	if err != nil {
 		log.Fatal(err)
