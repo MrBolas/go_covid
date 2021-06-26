@@ -1,9 +1,10 @@
-package models
+package apimodels
 
 import (
 	"time"
 
 	"github.com/kyokomi/emoji/v2"
+	"go_covid/src/utils"
 )
 
 type CountryTimeline struct {
@@ -23,8 +24,8 @@ const layoutUS = "1/2/06"
 // GetReport returns a report in string format
 func (c *CountryHistory) GetReport() string {
 
-	sortedCasesKeys := GetSortedKeys(c.Timeline.Cases)
-	sortedDeathsKeys := GetSortedKeys(c.Timeline.Deaths)
+	sortedCasesKeys := utils.GetSortedKeys(c.Timeline.Cases)
+	sortedDeathsKeys := utils.GetSortedKeys(c.Timeline.Deaths)
 	//sortedRecoveredKeys := getSortedKeys(c.Timeline.Recovered)
 
 	todayCases := c.Timeline.Cases[sortedCasesKeys[2]] - c.Timeline.Cases[sortedCasesKeys[1]]
@@ -44,7 +45,7 @@ func (c *CountryHistory) GetReport() string {
 func (c CountryTimeline) GetCasesTimeSeries() ([]time.Time, []float64, error) {
 
 	// Order cases by date
-	var orderedHistoryData []string = GetSortedKeys(c.Cases)
+	var orderedHistoryData []string = utils.GetSortedKeys(c.Cases)
 
 	// Define return slices
 	var TimeSeries []time.Time
@@ -74,7 +75,7 @@ func (c CountryTimeline) GetCasesTimeSeries() ([]time.Time, []float64, error) {
 func (c CountryTimeline) GetRelativeCasesTimeSeries() ([]time.Time, []float64, error) {
 
 	// Order cases by date
-	var orderedHistoryData []string = GetSortedKeys(c.Cases)
+	var orderedHistoryData []string = utils.GetSortedKeys(c.Cases)
 
 	// Define return slices
 	var TimeSeries []time.Time
@@ -110,7 +111,7 @@ func (c CountryTimeline) GetRelativeCasesTimeSeries() ([]time.Time, []float64, e
 func (c CountryTimeline) GetDeathsTimeSeries() ([]time.Time, []float64, error) {
 
 	// Order cases by date
-	var orderedHistoryData []string = GetSortedKeys(c.Deaths)
+	var orderedHistoryData []string = utils.GetSortedKeys(c.Deaths)
 
 	// Define return slices
 	var TimeSeries []time.Time
@@ -140,7 +141,7 @@ func (c CountryTimeline) GetDeathsTimeSeries() ([]time.Time, []float64, error) {
 func (c CountryTimeline) GetRelativeDeathsTimeSeries() ([]time.Time, []float64, error) {
 
 	// Order cases by date
-	var orderedHistoryData []string = GetSortedKeys(c.Deaths)
+	var orderedHistoryData []string = utils.GetSortedKeys(c.Deaths)
 
 	// Define return slices
 	var TimeSeries []time.Time

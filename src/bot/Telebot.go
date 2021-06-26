@@ -1,22 +1,24 @@
-package controllers
+package bot
 
 import (
 	"fmt"
-	"go_covid/models"
+	apicontrollers "go_covid/src/api/apicontrollers"
+	apimodels "go_covid/src/api/apimodels"
+	"go_covid/src/config"
+	dbmodels "go_covid/src/db/dbmodels"
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	s "strings"
 	"time"
 
 	chart "github.com/wcharczuk/go-chart/v2"
 	tb "gopkg.in/tucnak/telebot.v2"
-	"gorm.io/gorm"
 )
 
-func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
+func TeleCovidBot(token string) (*tb.Bot, error) {
 
+	db := config.DB
 	// Create new bot
 	b, err := tb.NewBot(tb.Settings{
 		Token:  token,
@@ -40,7 +42,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Get Country Data
-		var countryData = GetCountryData(country)
+		var countryData = apicontrollers.GetCountryData(country)
 
 		// b.Send(m.Sender, "Hello World!")
 		b.Send(m.Chat, countryData.GetReport())
@@ -59,7 +61,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Get Country Data
-		var countryHistoryData = GetHistoricalCountryData(country, days)
+		var countryHistoryData = apicontrollers.GetHistoricalCountryData(country, days)
 
 		// b.Send(m.Sender, "Hello World!")
 		b.Send(m.Chat, countryHistoryData.GetReport())
@@ -81,7 +83,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		fmt.Printf("Cases Chart -> country: %s days: %d\n", country, days)
 
 		// Get Country Data
-		var countryHistoryData = GetHistoricalCountryData(country, days)
+		var countryHistoryData = apicontrollers.GetHistoricalCountryData(country, days)
 
 		// Transform Data into TimeSeries
 		//timeseries, valueseries, err := countryHistoryData.Timeline.GetCasesTimeSeries()
@@ -92,17 +94,17 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Build graph
-		covidGraph := chart.Chart{
-			Series: []chart.Series{
-				chart.TimeSeries{
-					XValues: timeseries,
-					YValues: valueseries,
-				},
-			},
-		}
+		var graphLegend = fmt.Sprintf("Cases timeseries for %s", country)
+		var covidGraph = apimodels.CustomTSChart{}
+		covidGraph.Initialize(timeseries, valueseries, graphLegend)
+		covidGraph.XAxis.Name = "Time Progression ( Days )"
+		covidGraph.YAxis.Name = "Cases"
 
 		// Create image file and render image
-		f, _ := os.Create("assets/covid-cases-graph.png")
+		f, err := os.Create("assets/covid-cases-graph.png")
+		if err != nil {
+			log.Fatal(err)
+		}
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
 
@@ -126,10 +128,10 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 			return
 		}
 
-		fmt.Printf("Cases Chart -> country: %s days: %d\n", country, days)
+		fmt.Printf("Relative Cases Chart -> country: %s days: %d\n", country, days)
 
 		// Get Country Data
-		var countryHistoryData = GetHistoricalCountryData(country, days)
+		var countryHistoryData = apicontrollers.GetHistoricalCountryData(country, days)
 
 		// Transform Data into TimeSeries
 		//timeseries, valueseries, err := countryHistoryData.Timeline.GetCasesTimeSeries()
@@ -140,17 +142,17 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Build graph
-		covidGraph := chart.Chart{
-			Series: []chart.Series{
-				chart.TimeSeries{
-					XValues: timeseries,
-					YValues: valueseries,
-				},
-			},
-		}
+		var graphLegend = fmt.Sprintf("Relative Cases timeseries for %s", country)
+		var covidGraph = apimodels.CustomTSChart{}
+		covidGraph.Initialize(timeseries, valueseries, graphLegend)
+		covidGraph.XAxis.Name = "Time Progression ( Days )"
+		covidGraph.YAxis.Name = "Relative Cases"
 
 		// Create image file and render image
-		f, _ := os.Create("assets/covid-cases-graph.png")
+		f, err := os.Create("assets/covid-cases-graph.png")
+		if err != nil {
+			log.Fatal(err)
+		}
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
 
@@ -177,7 +179,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		fmt.Printf("Deaths Chart -> country: %s days: %d\n", country, days)
 
 		// Get Country Data
-		var countryHistoryData = GetHistoricalCountryData(country, days)
+		var countryHistoryData = apicontrollers.GetHistoricalCountryData(country, days)
 
 		// Transform Data into TimeSeries
 		timeseries, valueseries, err := countryHistoryData.Timeline.GetDeathsTimeSeries()
@@ -187,14 +189,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Build graph
-		covidGraph := chart.Chart{
-			Series: []chart.Series{
-				chart.TimeSeries{
-					XValues: timeseries,
-					YValues: valueseries,
-				},
-			},
-		}
+		var graphLegend = fmt.Sprintf("Deaths timeseries for %s", country)
+		var covidGraph = apimodels.CustomTSChart{}
+		covidGraph.Initialize(timeseries, valueseries, graphLegend)
+		covidGraph.XAxis.Name = "Time Progression ( Days )"
+		covidGraph.YAxis.Name = "Deaths"
 
 		// Create image file and render image
 		f, err := os.Create("assets/covid-death-graph.png")
@@ -227,7 +226,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		fmt.Printf("Deaths Chart -> country: %s days: %d\n", country, days)
 
 		// Get Country Data
-		var countryHistoryData = GetHistoricalCountryData(country, days)
+		var countryHistoryData = apicontrollers.GetHistoricalCountryData(country, days)
 
 		// Transform Data into TimeSeries
 		timeseries, valueseries, err := countryHistoryData.Timeline.GetRelativeDeathsTimeSeries()
@@ -237,17 +236,17 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Build graph
-		covidGraph := chart.Chart{
-			Series: []chart.Series{
-				chart.TimeSeries{
-					XValues: timeseries,
-					YValues: valueseries,
-				},
-			},
-		}
+		var graphLegend = fmt.Sprintf("Relative Deaths timeseries for %s", country)
+		var covidGraph = apimodels.CustomTSChart{}
+		covidGraph.Initialize(timeseries, valueseries, graphLegend)
+		covidGraph.XAxis.Name = "Time Progression ( Days )"
+		covidGraph.YAxis.Name = "Relative Deaths"
 
 		// Create image file and render image
-		f, _ := os.Create("assets/covid-death-graph.png")
+		f, err := os.Create("assets/covid-death-graph.png")
+		if err != nil {
+			log.Fatal(err)
+		}
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
 
@@ -270,13 +269,13 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		telegramId := m.Sender.ID
-		var subscription models.Subscription
+		var subscription dbmodels.Subscription
 		// Check if subscription exists
 		result := db.Where("telegram_id = ? AND country = ?", telegramId, country).First(&subscription)
 		resultString := ""
 		if result.RowsAffected == 0 {
 			// Will create
-			db.Create(&models.Subscription{Username: m.Sender.Username, TelegramId: m.Sender.ID, Country: country})
+			db.Create(&dbmodels.Subscription{Username: m.Sender.Username, TelegramId: m.Sender.ID, Country: country})
 			resultString = fmt.Sprintln("Subscription added for", country)
 		} else {
 			resultString = fmt.Sprintln("You already have a subscription for", country, "to unsubscribe use /unsubscribe", country)
@@ -295,7 +294,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 			return
 		}
 		telegramId := m.Sender.ID
-		var subscription models.Subscription
+		var subscription dbmodels.Subscription
 		// Check if subscription exists
 		result := db.Where("telegram_id = ? AND country = ?", telegramId, country).First(&subscription)
 		resultString := ""
@@ -313,7 +312,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 	b.Handle("/subscriptions", func(m *tb.Message) {
 		// String split
 		telegramId := m.Sender.ID
-		var subscriptions []models.Subscription
+		var subscriptions []dbmodels.Subscription
 		// Check existing subscriptions
 		result := db.Where("telegram_id = ?", telegramId).Find(&subscriptions)
 		resultString := ""
@@ -326,7 +325,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 				log.Println(subscriptions[i])
 				theArray = append(theArray, subscriptions[i].Country)
 			}
-			resultString = fmt.Sprintln("You have subscriptions for", strings.Join(theArray, ", "))
+			resultString = fmt.Sprintln("You have subscriptions for", s.Join(theArray, ", "))
 		}
 		b.Send(m.Sender, resultString)
 	})
@@ -356,7 +355,7 @@ func parseInputs(input []string) (string, int, error) {
 	if len(input) > 1 {
 		country = s.Join(input[1:], " ")
 	}
-	result, err := SearchCountry(country)
+	result, err := apicontrollers.SearchCountry(country)
 
 	country = result.Name.Common
 	return country, days, err

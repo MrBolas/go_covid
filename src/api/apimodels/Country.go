@@ -1,8 +1,9 @@
-package models
+package apimodels
 
 import (
 	"fmt"
 	s "strings"
+	"time"
 
 	"github.com/kyokomi/emoji/v2"
 )
@@ -51,4 +52,10 @@ func (c *Country) GetReport() string {
 		c.Country, flag, c.TodayCases, c.Cases, c.TodayDeaths, c.Deaths, c.Active, c.Recovered, c.Tests)
 
 	return report
+}
+
+func (c *Country) IsToday() bool {
+	todayDate := time.Now().Format("2006-01-02")
+	countryUptatedDate := time.Unix(int64(c.Updated), 0).Format("2006-01-02")
+	return todayDate == countryUptatedDate
 }
