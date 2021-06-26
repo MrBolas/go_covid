@@ -1,6 +1,8 @@
 package utils
 
 import (
+	s "strings"
+
 	"github.com/pariz/gountries"
 )
 
@@ -14,8 +16,14 @@ func SearchCountry(input string) (gountries.Country, error) {
 		searchTLD := "." + input
 		countries := query.FindAllCountries()
 		for _, country := range countries {
+			if s.EqualFold(country.Alpha2, input) {
+				return country, nil
+			}
+			if s.EqualFold(country.Alpha3, input) {
+				return country, nil
+			}
 			for _, tld := range country.TLDs {
-				if tld == searchTLD {
+				if s.EqualFold(tld, searchTLD) {
 					return country, nil
 				}
 			}

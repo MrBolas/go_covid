@@ -111,8 +111,3 @@ func GetCountryData(country string) models.Country {
 	return usedCountry
 }
 
-// validateCountry validates covid data from API.
-// Returns a String and error
-func validateCountry(country string) (string, error) {
-	return country, nil
-}
