@@ -50,9 +50,9 @@ func GetHistoricalCountryData(country string, days int) models.CountryHistory {
 	return usedCountry
 }
 
-// GetVacineData gets country covid vacine data from API.
+// GetVaccineData gets country covid vaccine data from API.
 // Returns a VaccineCountryData Struct
-func GetVacineData(country string) {
+func GetVaccineData(country string) models.VaccineCountryData {
 	resp, _ := http.Get(vacineUrl + country + vacineUrlParams)
 
 	// Verify Body not empty
@@ -61,10 +61,21 @@ func GetVacineData(country string) {
 	}
 
 	// Reads body
-	_, readErr := ioutil.ReadAll(resp.Body)
+	body, readErr := ioutil.ReadAll(resp.Body)
 	if readErr != nil {
 		log.Fatal(readErr)
 	}
+
+	// Creates model variable
+	vaccineData := models.VaccineCountryData{}
+
+	// Unmarshal Covid Data
+	jsonErr := json.Unmarshal(body, &vaccineData)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+
+	return vaccineData
 }
 
 // GetCountryData gets generic country covid data from API.

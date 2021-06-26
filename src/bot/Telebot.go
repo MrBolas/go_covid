@@ -67,6 +67,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 			Description: "Shows current subscriptions."},
 			Handler: onSubscriptions,
 		},
+		{Command: tb.Command{
+			Text:        "/vaccines",
+			Description: "Gives Vaccine Numbers for <Country>. Portugal is Default."},
+			Handler: onVaccines,
+		},
 	}
 
 	var unextendedCommands []tb.Command
