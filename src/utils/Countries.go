@@ -1,4 +1,4 @@
-package apicontrollers
+package utils
 
 import (
 	"github.com/pariz/gountries"

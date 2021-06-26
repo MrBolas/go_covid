@@ -7,6 +7,7 @@ import (
 	apimodels "go_covid/src/api/apimodels"
 	"go_covid/src/config"
 	dbmodels "go_covid/src/db/dbmodels"
+	"go_covid/src/utils"
 	"log"
 	"strconv"
 	s "strings"
@@ -94,6 +95,22 @@ func onCases(m *tb.Message) {
 
 	// Send image
 	b.Send(m.Chat, g)
+}
+
+func onVaccines(m *tb.Message) {
+	b := config.Bot
+
+	var input []string = s.Fields(m.Text)
+	country, _, err := parseInputs(input)
+	if err != nil {
+		b.Send(m.Chat, "Could not find country")
+		return
+	}
+
+	vaccineData := apicontrollers.GetVaccineData(country)
+
+	// b.Send(m.Sender, "Hello World!")
+	b.Send(m.Chat, vaccineData.GetReport())
 }
 
 func onNewCases(m *tb.Message) {
@@ -323,7 +340,7 @@ func parseInputs(input []string) (string, int, error) {
 	if len(input) > 1 {
 		country = s.Join(input[1:], " ")
 	}
-	result, err := apicontrollers.SearchCountry(country)
+	result, err := utils.SearchCountry(country)
 
 	country = result.Name.Common
 	return country, days, err
