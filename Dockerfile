@@ -1,8 +1,9 @@
 FROM golang:alpine
+RUN apk add build-base
 
 # Set necessary environmet variables needed for our image
 ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
+    CGO_ENABLED=1 \
     GOOS=linux \
     GOARCH=amd64
 
@@ -19,6 +20,9 @@ COPY . .
 
 # Build the application
 RUN go build -o main .
+
+# Move to /data directory as the place for storing the db
+WORKDIR /data
 
 # Move to /dist directory as the place for resulting binary folder
 WORKDIR /dist

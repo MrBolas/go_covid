@@ -31,8 +31,8 @@ func goDotEnvVariable(key string) string {
 	return result
 }
 
-func InitDB() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+func InitDB(dbName string) *gorm.DB {
+	db, err := gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -43,7 +43,11 @@ func InitDB() *gorm.DB {
 }
 
 func main() {
-	db := InitDB()
+	dbName := goDotEnvVariable("DB_NAME")
+	if len(dbName) < 1 {
+		dbName = "test.db"
+	}
+	db := InitDB(dbName)
 	config.DB = db
 	token := goDotEnvVariable("TELEGRAM_TOKEN")
 	b, err := bot.TeleCovidBot(token)
