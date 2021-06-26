@@ -1,9 +1,9 @@
-package controllers
+package apicontrollers
 
 import (
 	"encoding/json"
 	"fmt"
-	"go_covid/models"
+	models "go_covid/src/api/apimodels"
 	"io/ioutil"
 	"log"
 	"net/http"

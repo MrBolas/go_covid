@@ -1,11 +1,16 @@
 package main
 
 import (
-	bot "go_covid/controllers"
+	"go_covid/src/bot"
+	config "go_covid/src/config"
+	"go_covid/src/db/dbcontrollers"
+	"go_covid/src/db/dbmodels"
 	"log"
 	"os"
 
 	godotenv "github.com/joho/godotenv"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 // use godot package to load/read the .env file and
@@ -26,16 +31,29 @@ func goDotEnvVariable(key string) string {
 	return result
 }
 
+func InitDB() *gorm.DB {
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	// Migrate the schema
+	db.AutoMigrate(&dbmodels.Subscription{})
+	return db
+}
+
 func main() {
+	db := InitDB()
+	config.DB = db
 	token := goDotEnvVariable("TELEGRAM_TOKEN")
-	db := bot.InitDB()
+	b, err := bot.TeleCovidBot(token)
+	config.Bot = b
 
-	b, err := bot.TeleCovidBot(token, db)
-
+	ticker, _ := dbcontrollers.SetupSubscriptionsFetching(10)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	b.Start()
-
+	ticker.Stop()
 }
