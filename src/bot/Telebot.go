@@ -1,13 +1,13 @@
 package bot
 
 import (
+	"bytes"
 	"fmt"
 	apicontrollers "go_covid/src/api/apicontrollers"
 	apimodels "go_covid/src/api/apimodels"
 	"go_covid/src/config"
 	dbmodels "go_covid/src/db/dbmodels"
 	"log"
-	"os"
 	"strconv"
 	s "strings"
 	"time"
@@ -101,20 +101,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 		covidGraph.YAxis.Name = "Cases"
 
 		// Create image file and render image
-		f, err := os.Create("assets/covid-cases-graph.png")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-		covidGraph.Render(chart.PNG, f)
-
-		// Error handling
-		if err != nil {
-			log.Fatal(err)
-		}
+		buffer := bytes.NewBuffer([]byte{})
+		covidGraph.Render(chart.PNG, buffer)
 
 		// Upload graph image
-		g := &tb.Photo{File: tb.FromDisk("assets/covid-cases-graph.png")}
+		g := &tb.Photo{File: tb.FromReader(buffer)}
 
 		// Send image
 		b.Send(m.Chat, g)
@@ -154,20 +145,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 		covidGraph.YAxis.Name = "Relative Cases"
 
 		// Create image file and render image
-		f, err := os.Create("assets/covid-cases-graph.png")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-		covidGraph.Render(chart.PNG, f)
-
-		// Error handling
-		if err != nil {
-			log.Fatal(err)
-		}
+		buffer := bytes.NewBuffer([]byte{})
+		covidGraph.Render(chart.PNG, buffer)
 
 		// Upload graph image
-		g := &tb.Photo{File: tb.FromDisk("assets/covid-cases-graph.png")}
+		g := &tb.Photo{File: tb.FromReader(buffer)}
 
 		// Send image
 		b.Send(m.Chat, g)
@@ -206,20 +188,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 		covidGraph.YAxis.Name = "Deaths"
 
 		// Create image file and render image
-		f, err := os.Create("assets/covid-death-graph.png")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-		covidGraph.Render(chart.PNG, f)
-
-		// Error handling
-		if err != nil {
-			log.Fatal(err)
-		}
+		buffer := bytes.NewBuffer([]byte{})
+		covidGraph.Render(chart.PNG, buffer)
 
 		// Upload graph image
-		g := &tb.Photo{File: tb.FromDisk("assets/covid-death-graph.png")}
+		g := &tb.Photo{File: tb.FromReader(buffer)}
 
 		// Send image
 		b.Send(m.Chat, g)
@@ -258,21 +231,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 		covidGraph.YAxis.Name = "Relative Deaths"
 
 		// Create image file and render image
-		f, err := os.Create("assets/covid-death-graph.png")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-		covidGraph.Render(chart.PNG, f)
-
-		// Error handling
-		if err != nil {
-			log.Fatal(err)
-		}
+		buffer := bytes.NewBuffer([]byte{})
+		covidGraph.Render(chart.PNG, buffer)
 
 		// Upload graph image
-		g := &tb.Photo{File: tb.FromDisk("assets/covid-death-graph.png")}
-
+		g := &tb.Photo{File: tb.FromReader(buffer)}
 		// Send image
 		b.Send(m.Chat, g)
 	})
