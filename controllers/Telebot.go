@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	s "strings"
 	"time"
 
@@ -92,19 +91,21 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Build graph
-		covidGraph := chart.Chart{
-			Series: []chart.Series{
-				chart.TimeSeries{
-					XValues: timeseries,
-					YValues: valueseries,
-				},
-			},
-		}
+		var graphLegend = fmt.Sprintf("Cases timeseries for %s", country)
+		var covidGraph = models.CustomTSChart{}
+		covidGraph.Initialize(timeseries, valueseries, graphLegend)
+		covidGraph.XAxis.Name = "Time Progression ( Days )"
+		covidGraph.YAxis.Name = "Cases"
 
 		// Create image file and render image
-		f, _ := os.Create("assets/covid-cases-graph.png")
+		f, err := os.Create("assets/covid-cases-graph.png")
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
+
+		// Error handling
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// Upload graph image
 		g := &tb.Photo{File: tb.FromDisk("assets/covid-cases-graph.png")}
@@ -126,7 +127,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 			return
 		}
 
-		fmt.Printf("Cases Chart -> country: %s days: %d\n", country, days)
+		fmt.Printf("Relative Cases Chart -> country: %s days: %d\n", country, days)
 
 		// Get Country Data
 		var countryHistoryData = GetHistoricalCountryData(country, days)
@@ -140,19 +141,21 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Build graph
-		covidGraph := chart.Chart{
-			Series: []chart.Series{
-				chart.TimeSeries{
-					XValues: timeseries,
-					YValues: valueseries,
-				},
-			},
-		}
+		var graphLegend = fmt.Sprintf("Relative Cases timeseries for %s", country)
+		var covidGraph = models.CustomTSChart{}
+		covidGraph.Initialize(timeseries, valueseries, graphLegend)
+		covidGraph.XAxis.Name = "Time Progression ( Days )"
+		covidGraph.YAxis.Name = "Relative Cases"
 
 		// Create image file and render image
-		f, _ := os.Create("assets/covid-cases-graph.png")
+		f, err := os.Create("assets/covid-cases-graph.png")
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
+
+		// Error handling
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// Upload graph image
 		g := &tb.Photo{File: tb.FromDisk("assets/covid-cases-graph.png")}
@@ -187,14 +190,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Build graph
-		covidGraph := chart.Chart{
-			Series: []chart.Series{
-				chart.TimeSeries{
-					XValues: timeseries,
-					YValues: valueseries,
-				},
-			},
-		}
+		var graphLegend = fmt.Sprintf("Deaths timeseries for %s", country)
+		var covidGraph = models.CustomTSChart{}
+		covidGraph.Initialize(timeseries, valueseries, graphLegend)
+		covidGraph.XAxis.Name = "Time Progression ( Days )"
+		covidGraph.YAxis.Name = "Deaths"
 
 		// Create image file and render image
 		f, err := os.Create("assets/covid-death-graph.png")
@@ -203,6 +203,11 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
+
+		// Error handling
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// Upload graph image
 		g := &tb.Photo{File: tb.FromDisk("assets/covid-death-graph.png")}
@@ -237,19 +242,21 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 		}
 
 		// Build graph
-		covidGraph := chart.Chart{
-			Series: []chart.Series{
-				chart.TimeSeries{
-					XValues: timeseries,
-					YValues: valueseries,
-				},
-			},
-		}
+		var graphLegend = fmt.Sprintf("Relative Deaths timeseries for %s", country)
+		var covidGraph = models.CustomTSChart{}
+		covidGraph.Initialize(timeseries, valueseries, graphLegend)
+		covidGraph.XAxis.Name = "Time Progression ( Days )"
+		covidGraph.YAxis.Name = "Relative Deaths"
 
 		// Create image file and render image
-		f, _ := os.Create("assets/covid-death-graph.png")
+		f, err := os.Create("assets/covid-death-graph.png")
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
+
+		// Error handling
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// Upload graph image
 		g := &tb.Photo{File: tb.FromDisk("assets/covid-death-graph.png")}
@@ -326,7 +333,7 @@ func TeleCovidBot(token string, db *gorm.DB) (*tb.Bot, error) {
 				log.Println(subscriptions[i])
 				theArray = append(theArray, subscriptions[i].Country)
 			}
-			resultString = fmt.Sprintln("You have subscriptions for", strings.Join(theArray, ", "))
+			resultString = fmt.Sprintln("You have subscriptions for", s.Join(theArray, ", "))
 		}
 		b.Send(m.Sender, resultString)
 	})
