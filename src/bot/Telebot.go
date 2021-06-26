@@ -108,6 +108,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
 
+		// Error handling
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		// Upload graph image
 		g := &tb.Photo{File: tb.FromDisk("assets/covid-cases-graph.png")}
 
@@ -156,6 +161,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
 
+		// Error handling
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		// Upload graph image
 		g := &tb.Photo{File: tb.FromDisk("assets/covid-cases-graph.png")}
 
@@ -203,6 +213,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
 
+		// Error handling
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		// Upload graph image
 		g := &tb.Photo{File: tb.FromDisk("assets/covid-death-graph.png")}
 
@@ -249,6 +264,11 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 		}
 		defer f.Close()
 		covidGraph.Render(chart.PNG, f)
+
+		// Error handling
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// Upload graph image
 		g := &tb.Photo{File: tb.FromDisk("assets/covid-death-graph.png")}
