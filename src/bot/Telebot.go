@@ -112,7 +112,7 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 	})
 
 	// /casesR handler. Accepts /casesR <country> <days>. Default country is Portugal. Default number of days is 7.
-	b.Handle("/casesR", func(m *tb.Message) {
+	b.Handle("/new_cases", func(m *tb.Message) {
 
 		// String split
 		var input []string = s.Fields(m.Text)
@@ -199,7 +199,7 @@ func TeleCovidBot(token string) (*tb.Bot, error) {
 	})
 
 	// /deathsR handler. Accepts /deathsR <country> <days>. Default country is Portugal. Default number of days is 7.
-	b.Handle("/deathsR", func(m *tb.Message) {
+	b.Handle("/new_deaths", func(m *tb.Message) {
 
 		// String split
 		var input []string = s.Fields(m.Text)
