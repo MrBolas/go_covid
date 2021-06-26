@@ -3,12 +3,14 @@ package dbcontrollers
 import (
 	"go_covid/src/config"
 	models "go_covid/src/db/dbmodels"
+	"log"
 	"time"
 
 	"gorm.io/datatypes"
 )
 
 func handleSubscriptions() {
+	log.Println("handling subscriptions")
 	var subscriptions []models.Subscription
 	today := datatypes.Date(time.Now())
 	db := config.DB
