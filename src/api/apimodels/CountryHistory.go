@@ -1,10 +1,14 @@
 package apimodels
 
 import (
+	"errors"
+	"log"
+	"sort"
 	"time"
 
-	"github.com/kyokomi/emoji/v2"
 	"go_covid/src/utils"
+
+	"github.com/kyokomi/emoji/v2"
 )
 
 type CountryTimeline struct {
@@ -19,7 +23,58 @@ type CountryHistory struct {
 	Timeline CountryTimeline
 }
 
+type countryHistoryDatapoint struct {
+	key         string
+	value       float64
+	iso8602Date string
+	time        time.Time
+}
+
 const layoutUS = "1/2/06"
+const layoutISO8601 = "2006-01-02"
+
+func asSortedDataPoint(m map[string]int) ([]countryHistoryDatapoint, error) {
+	var dataSet []countryHistoryDatapoint
+	for key, val := range m {
+		time, err := time.Parse(layoutUS, key)
+		if err != nil {
+			log.Println("error paring date")
+			return nil, err
+		}
+		iso8602Date := time.Format(layoutISO8601)
+		dataSet = append(dataSet, countryHistoryDatapoint{
+			key:         key,
+			value:       float64(val),
+			iso8602Date: iso8602Date,
+			time:        time,
+		})
+	}
+	sort.Slice(dataSet, func(i, j int) bool { return dataSet[i].iso8602Date < dataSet[j].iso8602Date })
+	return dataSet, nil
+}
+
+func asTimeAndValueSeries(dataSet *[]countryHistoryDatapoint) ([]time.Time, []float64) {
+	var TimeSeries []time.Time
+	var ValueSeries []float64
+	for _, data := range *dataSet {
+		TimeSeries = append(TimeSeries, data.time)
+		ValueSeries = append(ValueSeries, data.value)
+	}
+	return TimeSeries, ValueSeries
+}
+
+func makeTimeAndValueRelative(timeSeries []time.Time, valueSeries []float64) ([]time.Time, []float64, error) {
+	if len(valueSeries) < 2 {
+		return nil, nil, errors.New("Value series too short, can't make relative")
+	}
+	currentValue := valueSeries[0]
+	var newValueSeries []float64
+	for _, val := range valueSeries[1:] {
+		newValueSeries = append(newValueSeries, val-currentValue)
+		currentValue = val
+	}
+	return timeSeries[1:], newValueSeries, nil
+}
 
 // GetReport returns a report in string format
 func (c *CountryHistory) GetReport() string {
@@ -43,132 +98,40 @@ func (c *CountryHistory) GetReport() string {
 
 // GetCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
 func (c CountryTimeline) GetCasesTimeSeries() ([]time.Time, []float64, error) {
-
-	// Order cases by date
-	var orderedHistoryData []string = utils.GetSortedKeys(c.Cases)
-
-	// Define return slices
-	var TimeSeries []time.Time
-	var ValueSeries []float64
-
-	// Goes for Dates and separates two sets of data.
-	// TimeSeries are the dates.
-	// ValueSeries are the corresponding values.
-	for _, date := range orderedHistoryData {
-		timeEvent, err := time.Parse(layoutUS, date)
-
-		// Appends Dates
-		TimeSeries = append(TimeSeries, timeEvent)
-
-		// Appends Date Values
-		ValueSeries = append(ValueSeries, float64(c.Cases[date]))
-
-		if err != nil {
-			return nil, nil, err
-		}
+	dataSet, err := asSortedDataPoint(c.Cases)
+	if err != nil {
+		log.Println("error converting data series")
+		return nil, nil, err
 	}
-
-	return TimeSeries, ValueSeries, nil
+	timeSeries, valueSeries := asTimeAndValueSeries(&dataSet)
+	return timeSeries, valueSeries, err
 }
 
 // GetRelativeCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
 func (c CountryTimeline) GetRelativeCasesTimeSeries() ([]time.Time, []float64, error) {
-
-	// Order cases by date
-	var orderedHistoryData []string = utils.GetSortedKeys(c.Cases)
-
-	// Define return slices
-	var TimeSeries []time.Time
-	var ValueSeries []float64
-
-	// Goes for Dates and separates two sets of data.
-	// TimeSeries are the dates.
-	// ValueSeries are the corresponding values.
-	for dateIndex, date := range orderedHistoryData {
-		timeEvent, err := time.Parse(layoutUS, date)
-
-		// Defines a relative value to the previous
-		newValue := float64(c.Cases[date])
-		if dateIndex > 1 {
-			newValue -= float64(c.Cases[orderedHistoryData[dateIndex-1]])
-
-			// Appends Dates
-			TimeSeries = append(TimeSeries, timeEvent)
-
-			// Appends Date Values
-			ValueSeries = append(ValueSeries, newValue)
-		}
-
-		if err != nil {
-			return nil, nil, err
-		}
+	timeSeries, valueSeries, err := c.GetCasesTimeSeries()
+	if err != nil {
+		return nil, nil, err
 	}
-
-	return TimeSeries, ValueSeries, nil
+	return makeTimeAndValueRelative(timeSeries, valueSeries)
 }
 
 // GetCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
 func (c CountryTimeline) GetDeathsTimeSeries() ([]time.Time, []float64, error) {
-
-	// Order cases by date
-	var orderedHistoryData []string = utils.GetSortedKeys(c.Deaths)
-
-	// Define return slices
-	var TimeSeries []time.Time
-	var ValueSeries []float64
-
-	// Goes for Dates and separates two sets of data.
-	// TimeSeries are the dates.
-	// ValueSeries are the corresponding values.
-	for _, date := range orderedHistoryData {
-		timeEvent, err := time.Parse(layoutUS, date)
-
-		// Appends Dates
-		TimeSeries = append(TimeSeries, timeEvent)
-
-		// Appends Date Values
-		ValueSeries = append(ValueSeries, float64(c.Deaths[date]))
-
-		if err != nil {
-			return nil, nil, err
-		}
+	dataSet, err := asSortedDataPoint(c.Deaths)
+	if err != nil {
+		log.Println("error converting data series")
+		return nil, nil, err
 	}
-
-	return TimeSeries, ValueSeries, nil
+	timeSeries, valueSeries := asTimeAndValueSeries(&dataSet)
+	return timeSeries, valueSeries, err
 }
 
 // GetCasesTimeSeries Seperates a Data set into two different slices for each of the variables in the data set.
 func (c CountryTimeline) GetRelativeDeathsTimeSeries() ([]time.Time, []float64, error) {
-
-	// Order cases by date
-	var orderedHistoryData []string = utils.GetSortedKeys(c.Deaths)
-
-	// Define return slices
-	var TimeSeries []time.Time
-	var ValueSeries []float64
-
-	// Goes for Dates and separates two sets of data.
-	// TimeSeries are the dates.
-	// ValueSeries are the corresponding values.
-	for dateIndex, date := range orderedHistoryData {
-		timeEvent, err := time.Parse(layoutUS, date)
-
-		// Defines a relative value to the previous
-		newValue := float64(c.Deaths[date])
-		if dateIndex > 1 {
-			newValue -= float64(c.Deaths[orderedHistoryData[dateIndex-1]])
-
-			// Appends Dates
-			TimeSeries = append(TimeSeries, timeEvent)
-
-			// Appends Date Values
-			ValueSeries = append(ValueSeries, newValue)
-		}
-
-		if err != nil {
-			return nil, nil, err
-		}
+	timeSeries, valueSeries, err := c.GetDeathsTimeSeries()
+	if err != nil {
+		return nil, nil, err
 	}
-
-	return TimeSeries, ValueSeries, nil
+	return makeTimeAndValueRelative(timeSeries, valueSeries)
 }
