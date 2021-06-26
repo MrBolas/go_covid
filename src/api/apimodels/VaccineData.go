@@ -2,7 +2,6 @@ package apimodels
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	s "strings"
 
@@ -33,7 +32,6 @@ func (v *VaccineCountryData) GetReport() string {
 	sort.Slice(timeline, func(i, j int) bool { return timeline[i].Date < timeline[j].Date })
 	last := timeline[1]
 	prev := timeline[0]
-	log.Println(timeline)
 	total := last.TotalPerHundred
 	if total == 0 {
 		total = prev.TotalPerHundred

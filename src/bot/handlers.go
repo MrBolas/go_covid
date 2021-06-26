@@ -306,11 +306,10 @@ func onSubscriptions(m *tb.Message) {
 	if result.RowsAffected == 0 {
 		resultString = fmt.Sprintln("Subscriptions not found")
 	} else {
-		log.Println(subscriptions)
 		var theArray []string
 		for i := 0; i < len(subscriptions); i++ {
-			log.Println(subscriptions[i])
-			theArray = append(theArray, subscriptions[i].Country)
+			country, _ := utils.SearchCountry(subscriptions[i].Country)
+			theArray = append(theArray, country.Name.Common)
 		}
 		resultString = fmt.Sprintln("You have subscriptions for", s.Join(theArray, ", "))
 	}
@@ -342,6 +341,6 @@ func parseInputs(input []string) (string, int, error) {
 	}
 	result, err := utils.SearchCountry(country)
 
-	country = result.Name.Common
+	country = result.Codes.Alpha2
 	return country, days, err
 }
