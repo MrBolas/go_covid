@@ -56,6 +56,6 @@ func (c *Country) GetReport() string {
 
 func (c *Country) IsToday() bool {
 	todayDate := time.Now().Format("2006-01-02")
-	countryUptatedDate := time.Unix(int64(c.Updated), 0).Format("2006-01-02")
+	countryUptatedDate := time.Unix(int64(c.Updated/1000), 0).Format("2006-01-02")
 	return todayDate == countryUptatedDate
 }
