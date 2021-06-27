@@ -11,8 +11,9 @@ import (
 
 func handleSubscriptions() {
 	log.Println("handling subscriptions")
+	loc := config.Loc
 	var subscriptions []models.Subscription
-	today := datatypes.Date(time.Now())
+	today := datatypes.Date(time.Now().In(loc))
 	db := config.DB
 	db.Where("last_report_date < ? OR last_report_date is ?", today, nil).Find(&subscriptions)
 	for _, subscription := range subscriptions {

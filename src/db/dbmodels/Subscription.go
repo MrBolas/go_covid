@@ -1,8 +1,8 @@
 package dbmodels
 
 import (
-	"go_covid/src/config"
 	apicontrollers "go_covid/src/api/apicontrollers"
+	"go_covid/src/config"
 	"log"
 	"time"
 
@@ -22,7 +22,8 @@ type Subscription struct {
 func (subscription *Subscription) Notify() bool {
 	db := config.DB
 	bot := config.Bot
-	today := datatypes.Date(time.Now())
+	loc := config.Loc
+	today := datatypes.Date(time.Now().In(loc))
 	data := apicontrollers.GetCountryData(subscription.Country)
 	if data.IsToday() {
 		log.Printf("Will notify %s of %s\n", subscription.Username, subscription.Country)
@@ -36,7 +37,8 @@ func (subscription *Subscription) Notify() bool {
 }
 
 func (subscription Subscription) GetToUptade(subscriptions *[]Subscription) {
-	today := datatypes.Date(time.Now())
+	loc := config.Loc
+	today := datatypes.Date(time.Now().In(loc))
 	db := config.DB
 	db.Where("last_report_date < ? OR last_report_date is ?", today, nil).Find(&subscriptions)
 }
